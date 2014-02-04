@@ -1,3 +1,4 @@
+#include<limits.h>
 #include<math.h>
 #include<stdint.h>
 #include<stdlib.h>
@@ -5,7 +6,7 @@
 #define SIZE 9
 #define LENGTH 3
 
-#define REALLY_BIG_NUMBER 32000
+#define REALLY_BIG_NUMBER INT_MAX
 
 #define EMPTY 0
 #define X 1
