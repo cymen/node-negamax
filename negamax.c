@@ -1,5 +1,4 @@
 #include<math.h>
-#include<stdio.h>
 #include<stdint.h>
 #include<stdlib.h>
 
@@ -22,15 +21,6 @@ char* playerAsChar(int player) {
 
     return "_";
 }
-
-void printBoard(uint8_t board[]) {
-  /* printf("\n"); */
-  /* printf("%s %s %s\n", playerAsChar(board[0]), playerAsChar(board[1]), playerAsChar(board[2])); */
-  /* printf("%s %s %s\n", playerAsChar(board[3]), playerAsChar(board[4]), playerAsChar(board[5])); */
-  /* printf("%s %s %s\n", playerAsChar(board[6]), playerAsChar(board[7]), playerAsChar(board[8])); */
-  /* printf("\n"); */
-}
-
 
 int isPlayed(int value) {
   if (value == X || value == O) {
@@ -83,14 +73,10 @@ int tied(uint8_t board[]) {
 
 int over(uint8_t board[]) {
   if (winner(board) != 0) {
-    /* printf("over with winner\n"); */
-    printBoard(board);
     return 1;
   }
 
   if (tied(board) == 1) {
-    /* printf("over with tie\n"); */
-    printBoard(board);
     return 1;
   }
 
@@ -115,33 +101,29 @@ int turn(uint8_t board[]) {
   return (emptyCount(board) % 2 == 1) ? X : O;
 }
 
-int analysis(uint8_t board[], int player, int height) {
-  int theWinner = winner(board);
-  if (theWinner != 0) {
-    if (theWinner == player) {
-      /* printf("analysis returning for winner: %d\n", height); */
-      return height;
-    } else {
-      /* printf("analysis returning for loser: %d\n", -height); */
-      return -height;
-    }
+int analysis(uint8_t board[], int depth) {
+  if (winner(board)) {
+    return -depth;
   }
 
-  return 0;
+  if (tied(board)) {
+    return 0;
+  }
+
+  return REALLY_BIG_NUMBER;
 }
 
-int negamax_recursive(uint8_t board[], int player, int height, int alpha, int beta) {
+int negamax_recursive(uint8_t board[], int player, int depth, int alpha, int beta) {
   int bestWeight = -1 * REALLY_BIG_NUMBER;
 
-  if (over(board) == 1) {
-    printBoard(board);
-    return analysis(board, player, height);
+  if (over(board) == 1 || depth > 6) {
+    return analysis(board, depth);
   }
 
   for (int i=0; i < SIZE; i++) {
     if (isPlayed(board[i] == 0)) {
       board[i] = player;
-      int playResult = -1 * negamax_recursive(board, opponent(player), height-1, -beta, -alpha);
+      int playResult = -1 * negamax_recursive(board, opponent(player), depth+1, -beta, -alpha);
       board[i] = 0;
 
       if (playResult > bestWeight) {
@@ -166,11 +148,11 @@ void negamax(uint8_t board[], int8_t result[]) {
     result[0] = result[2] = result[4] = result[6] = result[8] = SIZE;
   } else {
     int player = turn(board);
+    int initialDepth = 1;
     for (int i=0; i < SIZE; i++) {
       if (isPlayed(board[i] == 0)) {
         board[i] = player;
-        int playResult = -1 * negamax_recursive(board, opponent(player), SIZE, -REALLY_BIG_NUMBER, REALLY_BIG_NUMBER);
-        /* printf("weight for playing %d: %d\n", i, playResult); */
+        int playResult = -1 * negamax_recursive(board, opponent(player), initialDepth, -REALLY_BIG_NUMBER, REALLY_BIG_NUMBER);
         result[i] = playResult;
         board[i] = 0;
       }
@@ -188,7 +170,7 @@ int main() {
   /* board[0] = board[6] = X; */
   /* board[3] = board[8] = O; */
 
-  board[0] = X;
+  //board[0] = X;
 
   negamax(board, result);
 
