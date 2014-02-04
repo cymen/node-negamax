@@ -58,7 +58,7 @@ negamax = function(board) {
 
 getBestMoves = function(board) {
   var bestMoves = [],
-      maxWeight = 0,
+      maxWeight = -Infinity,
       moveWeights;
 
   moveWeights = negamax(board);

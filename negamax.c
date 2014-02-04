@@ -1,6 +1,8 @@
 #include<limits.h>
 #include<math.h>
+#include<stdbool.h>
 #include<stdint.h>
+#include<stdio.h>
 #include<stdlib.h>
 
 #define SIZE 9
@@ -12,23 +14,8 @@
 #define X 1
 #define O 2
 
-char* playerAsChar(int player) {
-    if (player == X) {
-      return "x";
-    }
-    if (player == O) {
-      return "o";
-    }
-
-    return "_";
-}
-
-int isPlayed(int value) {
-  if (value == X || value == O) {
-    return 1;
-  } else {
-    return 0;
-  }
+bool isPlayed(int value) {
+  return (value == X || value == O);
 }
 
 int winner(uint8_t board[]) {
@@ -55,33 +42,29 @@ int winner(uint8_t board[]) {
     return board[2];
   }
 
-  return 0;
+  return EMPTY;
 }
 
-int tied(uint8_t board[]) {
+bool won(uint8_t board[]) {
+  return winner(board) != 0;
+}
+
+bool tied(uint8_t board[]) {
   for (int i=0; i < SIZE; i++) {
-    if (isPlayed(board[i]) == 0) {
-      return 0;
+    if (isPlayed(board[i])) {
+      return false;
     }
   }
 
-  if (winner(board)) {
-    return 0;
+  if (won(board)) {
+    return false;
   }
 
-  return 1;
+  return true;
 }
 
-int over(uint8_t board[]) {
-  if (winner(board) != 0) {
-    return 1;
-  }
-
-  if (tied(board) == 1) {
-    return 1;
-  }
-
-  return 0;
+bool over(uint8_t board[]) {
+  return won(board) || tied(board);
 }
 
 int opponent(int player) {
@@ -91,7 +74,7 @@ int opponent(int player) {
 int emptyCount(uint8_t board[]) {
   int emptyCount = 0;
   for (int i=0; i < SIZE; i++) {
-    if (isPlayed(board[i]) == 0) {
+    if (!isPlayed(board[i])) {
       emptyCount += 1;
     }
   }
@@ -103,7 +86,7 @@ int turn(uint8_t board[]) {
 }
 
 int analysis(uint8_t board[], int depth) {
-  if (winner(board)) {
+  if (won(board)) {
     return -depth;
   }
 
@@ -111,20 +94,20 @@ int analysis(uint8_t board[], int depth) {
     return 0;
   }
 
-  return REALLY_BIG_NUMBER;
+  return depth * depth;
 }
 
 int negamax_recursive(uint8_t board[], int player, int depth, int alpha, int beta) {
-  int bestWeight = -1 * REALLY_BIG_NUMBER;
+  int bestWeight = -REALLY_BIG_NUMBER;
 
-  if (over(board) == 1 || depth > 6) {
+  if (over(board) || depth > 6) {
     return analysis(board, depth);
   }
 
   for (int i=0; i < SIZE; i++) {
-    if (isPlayed(board[i] == 0)) {
+    if (!isPlayed(board[i])) {
       board[i] = player;
-      int playResult = -1 * negamax_recursive(board, opponent(player), depth+1, -beta, -alpha);
+      int playResult = -negamax_recursive(board, opponent(player), depth + 1, -beta, -alpha);
       board[i] = 0;
 
       if (playResult > bestWeight) {
@@ -145,18 +128,14 @@ int negamax_recursive(uint8_t board[], int player, int depth, int alpha, int bet
 }
 
 void negamax(uint8_t board[], int8_t result[]) {
-  if (emptyCount(board) == SIZE) {
-    result[0] = result[2] = result[4] = result[6] = result[8] = SIZE;
-  } else {
-    int player = turn(board);
-    int initialDepth = 1;
-    for (int i=0; i < SIZE; i++) {
-      if (isPlayed(board[i] == 0)) {
-        board[i] = player;
-        int playResult = -1 * negamax_recursive(board, opponent(player), initialDepth, -REALLY_BIG_NUMBER, REALLY_BIG_NUMBER);
-        result[i] = playResult;
-        board[i] = 0;
-      }
+  int player = turn(board);
+  int initialDepth = 1;
+  for (int i=0; i < SIZE; i++) {
+    if (!isPlayed(board[i])) {
+      board[i] = player;
+      int playResult = -negamax_recursive(board, opponent(player), initialDepth, -REALLY_BIG_NUMBER, REALLY_BIG_NUMBER);
+      result[i] = playResult;
+      board[i] = 0;
     }
   }
 }
@@ -176,6 +155,11 @@ int main() {
   negamax(board, result);
 
   for (int i=0; i < SIZE; i++) {
-    /* printf("%d: %d\n", i, result[i]); */
+    printf("%d: %d\n", i, result[i]);
   }
+
+  int x = INT_MAX;
+  printf("x: %d\n", x);
+  x = -x;
+  printf("x: %d\n", x);
 }
