@@ -6,7 +6,6 @@ uses an array of integers to represent the board with this convention:
     1 = X
     2 = O
 
-
     0    |1    |2
          |     |
     _____|_____|_____
