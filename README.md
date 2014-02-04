@@ -7,13 +7,13 @@ uses an array of integers to represent the board with this convention:
 2 = O
 
 
-1    |2    |3
+0    |1    |2
      |     |
 _____|_____|_____
-4    |5    |6
-     |     |              ===        [1, 2, 3, 4, 5, 6, 7, 8, 9]
+3    |4    |5
+     |     |              ===        [0, 1, 2, 3, 4, 5, 6, 7, 8]
 _____|_____|_____
-7    |8    |9
+6    |7    |8
      |     |
      |     |
 
@@ -29,9 +29,11 @@ highest value.
     $ node
     > var negamax = require('./negamax');
     undefined
-    > negamax([0, 0, 0, 0, 0, 0, 0, 0, 0]);
-    [?]
+    > negamax.getBestMoves([_, _, _, _, _, _, _, _, _]);
+    [ 0, 2, 4, 6, 8 ]
 
 or:
 
-  node try.js
+    node try.js
+    negamax.getBestMoves(['x', _, _, 'o', _, _, 'x', _, 'o']): [ 2 ]
+    negamax.getBestMoves([_, _, _, _, _, _, _, _, _]): [ 0, 2, 4, 6, 8 ]
